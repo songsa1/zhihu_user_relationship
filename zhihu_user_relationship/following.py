@@ -138,17 +138,13 @@ def user_detail(session, q, user_name=start_name):
 
 
 if __name__ == '__main__':
-    print(datetime.datetime.now())
     t_list = []
     session = login()  # 获取serssion
     user_detail(session, q)
-    # for i in user_name_list:
-    #     user_detail(session,i)
     pool = ThreadPoolExecutor(max_workers=12)
     try:
         while True:
             wait(t_list, return_when=ALL_COMPLETED)  # 等待子进程结束
-            # print("当前队列大小为：", q.qsize())
             if q.empty() == False:
                 for i in range(8):
                     name = q.get()

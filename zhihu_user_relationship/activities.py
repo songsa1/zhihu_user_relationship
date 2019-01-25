@@ -65,11 +65,12 @@ def get_mess(url,session,user_name):
         address = ''
     return name, school, business, address
 
-def insert_mess(name, school, business, address, url):
+def insert_mess(user_name, name, school, business, address, url):
+    print(user_name, name, school, business, address, url)
     try:
         db = pymysql.connect(db_host, db_user, db_pass, db_database)
         cursor = db.cursor()
-        sql = 'insert into activities (user_name,school,business,address,url) values ("{0}","{1}","{2}","{3}","{4}")'.format(name, school, business, address, url)
+        sql = 'insert into activities (user_name, name,school,business,address,url) values ("{0}","{1}","{2}","{3}","{4}","{5}")'.format(user_name, name, school, business, address, url)
         cursor.execute(sql)
         db.commit()
         db.close()
@@ -88,13 +89,10 @@ if __name__ == '__main__':
             user_name = user_Queue.get()
             print("当前队列大小：", user_Queue.qsize())
             url = basic_url+user_name+'/'+activities
+            print(url)
             name, school, business, address = get_mess(url,session,user_name)
-            print(name)
-            print(school)
-            print(business)
-            print(address)
             print('-----------------------------------------------------------------')
-            insert_mess(name, school, business, address,url)
+            insert_mess(user_name, name, school, business, address,url)
         else:
             break
 
