@@ -120,7 +120,6 @@ def user_detail(session, user_name=start_name):
 if __name__ == '__main__':
     t_list = []
     session = login()  # 获取serssion
-    user_detail(session)
     pool = ThreadPoolExecutor(max_workers=12)
     while True:
         wait(t_list, return_when=ALL_COMPLETED)  # 等待子进程结束

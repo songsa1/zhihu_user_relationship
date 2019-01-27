@@ -16,8 +16,8 @@ from selenium import webdriver
 from YDM import use_ydm
 
 
-user = ''
-pwd = ''
+user = '15894648760'
+pwd = '*hs19931221*'
 
 def start_Chrome():  # 调用浏览器
     options = webdriver.ChromeOptions()
