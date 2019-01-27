@@ -73,7 +73,7 @@ def get_page_num(session, module_num, user_name=start_name):  # 获取following�
         return 0
 
 
-def main_logic(session, url, user_name, q):
+def main_logic(session, url, user_name):
     on_name_list = []  # 方法级list，用来存放当前url获取到的关注者名单，用来和当前用户组成字典，便于入库
     num = 0
     result = session.get(url, headers=header)
@@ -110,7 +110,7 @@ def user_detail(session, user_name=start_name):
             new_url = 'https://www.zhihu.com/people/{0}/{1}?page={2}'.format(user_name, following,str(page + 1))  # 拼接目标url
             print("下一步请求的url：%s" % (new_url))
             #  url拼接原理：原始路径 + username + 页面模块标识 + page
-            on_name_list = main_logic(session, new_url, user_name, q)
+            on_name_list = main_logic(session, new_url, user_name)
             conn_mysql(user_name, on_name_list)  #将当前following页的关注用户存入数据库
     else:
         print('目标用户following页面请求失败')
@@ -127,11 +127,11 @@ if __name__ == '__main__':
         conn = get_link()
         if conn.scard('user_name') != 0:
             for i in range(8):
-                name = conn.spop('user_name').decode('utf-8')
-                if name != None:
+                try:
+                    name = conn.spop('user_name').decode('utf-8')
                     t = pool.submit(user_detail, session, name)
                     t_list.append(t)
-                else:
+                except Exception as e:
                     print("redis中user_name set 为空，程序结束！")
                     break
         else:

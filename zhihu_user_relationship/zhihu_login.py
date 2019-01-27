@@ -86,9 +86,9 @@ def login():
                 base64_img_url = img_url.replace('data:image/jpg;base64,','')  # 对base64做处理
                 make_base64(base64_img_url)
                 input_lable = browser.find_elements_by_name('captcha')[0]
-                show_img()
-                code = input('手动打码，请输入验证码>>>')
-                # code = use_ydm('img_code.png')  # 调用云打码接口，返回识别后的内容
+                # show_img()
+                # code = input('手动打码，请输入验证码>>>')
+                code = use_ydm('img_code.png')  # 调用云打码接口，返回识别后的内容
                 input_lable.send_keys(code)    # 将验证码写入
                 time.sleep(1.5)
                 button.click()

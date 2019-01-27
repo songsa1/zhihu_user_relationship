@@ -6,8 +6,9 @@
 # @File    : conn_redis.py
 # @Software: PyCharm
 import redis
-def get_link(ip='118.24.26.224', port=6379):
-    redis_pool = redis.ConnectionPool(host=ip, port=port, max_connections=20)  # 创建一个连接池
+
+redis_pool = redis.ConnectionPool(host='118.24.26.224', port=6379, max_connections=20)  # 创建一个连接池
+def get_link():
     conn = redis.Redis(connection_pool=redis_pool,decode_responses=True)  # 从池子里边起一个链接
     return conn
     # print(conn.get('myKey').decode('utf-8'))
