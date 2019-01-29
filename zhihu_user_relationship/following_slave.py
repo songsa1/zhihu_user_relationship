@@ -111,7 +111,7 @@ def user_detail(session, user_name=start_name):
             print("下一步请求的url：%s" % (new_url))
             #  url拼接原理：原始路径 + username + 页面模块标识 + page
             on_name_list = main_logic(session, new_url, user_name, q)
-            conn_mysql(user_name, on_name_list)  #将当前following页的关注用户存入数据库
+            # conn_mysql(user_name, on_name_list)  #将当前following页的关注用户存入数据库
     else:
         print('目标用户following页面请求失败')
 
