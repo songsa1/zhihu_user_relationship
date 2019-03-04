@@ -5,16 +5,18 @@
 # @Desc    : 
 # @File    : activities.py
 # @Software: PyCharm
+import configparser
+import json
 import os
 import sys
-import json
+
 import pymysql
-import configparser
-from lxml import etree
-import requests
 from conn_redis import get_link
-from config.log import public_log
-from get_proxy import get_proxy
+
+from PublicLog import public_log
+from MasterFollowing import get_html
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
+
 
 cf = configparser.ConfigParser()
 cf.read('conf.ini')
@@ -32,9 +34,9 @@ headers = {
     'cookie':'_xsrf=EBoGl1ayJmZOQctQMax8Iss7SfgGNXof; _zap=5bd4fcbf-017e-469e-bd03-8f53b33804fc; d_c0="ALBkW_QICA-PTkrmznO5tvQqsI1lcRVGjZQ=|1551017256"; tst=r; q_c1=6ff74248ac3845328f2230e8805de0c6|1551017288000|1551017288000; __utmz=155987696.1551017343.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); anc_cap_id=0365d898dc274aceadac523339b0c3de; __utma=155987696.650061337.1551017343.1551017343.1551107373.2; __utmc=155987696; tgw_l7_route=578107ff0d4b4f191be329db6089ff48'
     ,'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36'
 }
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
-logger = public_log(log_file=os.path.join(BASE_DIR, 'zhihu_user_relationship/log', 'activities.log'))
+logger = public_log(log_file=os.path.join(BASE_DIR, 'log', 'activities.log'))
 
 
 def get_username(column_name):
@@ -51,43 +53,44 @@ def get_username(column_name):
     return results
 
 def get_mess(url, user_name):
-    result = requests.get(url, headers=headers)
-    if result.status_code != 200:
-        proxy = get_proxy()
-        result = requests.get(url, headers=headers, proxies=proxy)
-    html = etree.HTML(result.text)
-    if html.xpath('//title/text()')[0] == '安全验证 - 知乎':
-        proxy = get_proxy()
-        result = requests.get(url, headers=headers, proxies=proxy)
-        html = etree.HTML(result.text)
-    try:
-        data_json = json.loads(html.xpath('//script[@id="js-initialData"]/text()')[0])
-        user_details = data_json['initialState']['entities']['users'][user_name]
+    html = get_html(url)
+    if html != 0:
         try:
-            school = user_details['educations'][0]['school']['name']
-        except:
-            school = ''
-        try:
-            business = user_details['business']['name']
-        except:
-            business = ''
-        try:
-            name = user_details['name']
-        except:
-            name = ''
-        try:
-            address = user_details['locations'][0]['name']
-        except:
-            address = ''
-        try:
-            gender = user_details['gender']
-        except:
-            gender = ''
-        # print(str(name), str(school), str(business), str(address), str(gender))
-        return str(name), str(school), str(business), str(address), str(gender)
+            data_json = json.loads(html.xpath('//script[@id="js-initialData"]/text()')[0])
+            user_details = data_json['initialState']['entities']['users'][user_name]
+            try:
+                school = user_details['educations'][0]['school']['name']
+            except:
+                school = ''
+            try:
+                diploma_list = list()
+                educations = user_details['educations']
+                for i in educations:
+                    diploma = i['diploma']
+                    print(diploma)
+                    diploma_list.append(diploma)
 
-    except Exception as e:
-            return
+                # business = user_details['business']['name']
+            except:
+                business = ''
+            try:
+                name = user_details['name']
+            except:
+                name = ''
+            try:
+                address = user_details['locations'][0]['name']
+            except:
+                address = ''
+            try:
+                gender = user_details['gender']
+            except:
+                gender = ''
+            followerCount = user_details['followerCount']
+            followingCount = user_details['followingCount']
+
+            insert_mess(name, school, business, address, gender, url)
+        except Exception as e:
+                print("异常>>>"+str(e))
 
 
 def insert_mess(name, school, business, address, gender, url):
@@ -108,24 +111,20 @@ def insert_mess(name, school, business, address, gender, url):
         logger.info("数据库连接失败"+str(e))
 
 if __name__ == '__main__':
+    t_list = []
+    pool = ThreadPoolExecutor(max_workers=8)
     while True:
         conn = get_link()
-        if conn.scard('user_name'):
-            user_name = conn.srandmember(name='user_name', number=1)[0].decode('utf-8')
-            if not conn.sismember("zhihu_user",user_name):
-                conn.sadd('zhihu_user', user_name)
-                url = basic_url+user_name+'/'+activities
-                try:
-                    name, school, business, address, gender = get_mess(url, user_name)
-                except Exception as e:
-                    logger.info("有异常>>>"+str(e))
-                    continue
-                if name or school or business or address or gender:
-                    insert_mess(name, school, business, address, gender, url)
-                else:
-                    continue
-        else:
-            break
+        wait(t_list, return_when=ALL_COMPLETED)  # 等待子进程结束
+        for i in range(4):
+            user_name = conn.srandmember(name='TokenBefore', number=1)[0].decode('utf-8')
+            url = basic_url+user_name+'/'+activities
+            try:
+                t = pool.submit(get_mess, url, user_name)
+                t_list.append(t)
+            except Exception as e:
+                logger.info("有异常>>>"+str(e))
+                continue
 
 
 

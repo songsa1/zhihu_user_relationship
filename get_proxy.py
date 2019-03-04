@@ -5,9 +5,12 @@
 # @Desc    : 
 # @File    : get_proxy.py
 # @Software: PyCharm
-import requests
 import json
-from config.log import public_log
+
+import requests
+
+from PublicLog import public_log
+
 api = 'http://ged.ip3366.net/api/?key=20190227232137630&getnum=5&order=1&formats=2&proxytype=1'
 headers = {
     'method':'GET',
