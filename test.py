@@ -25,8 +25,8 @@ def get_proxy():
     proxyPort = "9010"
     url = 'https://www.zhihu.com/people/gu-yu-sheng-95-25/following'
     # 代理隧道验证信息
-    proxyUser = "H222928065U2443P"
-    proxyPass = "81E1DEE0BCA85BAE"
+    proxyUser = "HL17738540O7973P"
+    proxyPass = "EDD5BE6A92A8A4D4"
 
     proxyMeta = "http://%(user)s:%(pass)s@%(host)s:%(port)s" % {
         "host": proxyHost,

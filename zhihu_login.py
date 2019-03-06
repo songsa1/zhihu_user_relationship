@@ -6,7 +6,7 @@
 # @File    : zhihu_login.py
 # @Software: PyCharm
 
-
+import os
 import time
 import base64
 import json
@@ -14,7 +14,15 @@ import requests
 from PIL import Image
 from selenium import webdriver
 from YDM import use_ydm
-
+headers = {
+    'authority': 'www.zhihu.com',
+    'method': 'GET',
+    'scheme': 'https',
+    'accept-language':'zh-CN,zh;q=0.8',
+    'accept-encoding':'gzip, deflate, br',
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36'
+}
 
 user = '15894648760'
 pwd = '*hs19931221*'
@@ -48,12 +56,17 @@ def show_img():  # 展示验证码
     img.show()
 
 def make_session(browser):  #保持session
-    s = requests.Session()  # 创建一个session对象
+    # s = requests.Session()  # 创建一个session对象
     cookies = browser.get_cookies()  #从browser中获取cookie列表（一个列表，列表中的每一个元素都是一个字典）
-    for i in cookies:
-        s.cookies.set(i['name'],i['value'])
-    browser.close()
-    return s
+    with open('session.txt','w', encoding='utf-8') as f:
+        json.dump(cookies, f)
+        print('cookie 保存成功')
+    # for i in cookies:
+    #     print(i)
+    #     s.cookies.set(i['name'],i['value'])
+    # browser.close()
+    # print(s)
+    # return s
 
 def login():
     while True:
@@ -67,8 +80,7 @@ def login():
                 print('没有验证码,直接点击登录！')
                 button.click()
                 time.sleep(1.5)
-                s = make_session(browser)
-                return s
+                make_session(browser)
             else:
                 print('中文验证码，暂时未作处理，跳过')
                 browser.close()
@@ -80,8 +92,8 @@ def login():
                 print('没有验证码,直接点击登录！')
                 button.click()
                 time.sleep(1.5)
-                s = make_session(browser)
-                return s
+                make_session(browser)
+
             else:
                 base64_img_url = img_url.replace('data:image/jpg;base64,','')  # 对base64做处理
                 make_base64(base64_img_url)
@@ -93,6 +105,9 @@ def login():
                 time.sleep(1.5)
                 button.click()
                 time.sleep(1.5)
-                s = make_session(browser)
-                return s
+                make_session(browser)  # 保存cookie
+
+if __name__ == '__main__':
+    login()
+
 

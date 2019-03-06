@@ -12,8 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import requests
 from lxml import etree
 from conn_redis import get_link
-from get_proxy import get_proxy
-# from test import get_proxy
+# from get_proxy import get_proxy
+from test import get_proxy
 from PublicLog import public_log
 cf = configparser.ConfigParser()
 cf.read('conf.ini')
@@ -21,9 +21,9 @@ headers = {
     'authority': 'www.zhihu.com',
     'method': 'GET',
     'scheme': 'https',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'cookie': '_xsrf=EBoGl1ayJmZOQctQMax8Iss7SfgGNXof; _zap=5bd4fcbf-017e-469e-bd03-8f53b33804fc; d_c0="ALBkW_QICA-PTkrmznO5tvQqsI1lcRVGjZQ=|1551017256"; tst=r; q_c1=6ff74248ac3845328f2230e8805de0c6|1551017288000|1551017288000; __utmz=155987696.1551017343.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); capsion_ticket="2|1:0|10:1551276947|14:capsion_ticket|44:NzQ2MGRmNjdjYzkzNDdlMDg5YWUxNTg4NmU3YmE1Mzc=|c06b73db85eed390f2f9a1ddc768f5f59b9a9ae3dbcbd154f6e52b6c09bc6bc6"; z_c0="2|1:0|10:1551276956|4:z_c0|92:Mi4xSDNaOEF3QUFBQUFBc0dSYjlBZ0lEeVlBQUFCZ0FsVk5uT2xqWFFDNGpsWklvVDVrcldPa09pQXRGMkRTM1BUaGp3|77a9a62ef859783ed12c3f504d1bb288e33b45a4abbcce2d80138b7799e35485"; tgw_l7_route=6936aeaa581e37ec1db11b7e1aef240e; __utma=155987696.650061337.1551017343.1551107373.1551283620.3; __utmb=155987696.0.10.1551283620'
-    ,
+    'accept-encoding':'gzip, deflate, br',
+    'cookie':'tgw_l7_route=7c109f36fa4ce25acb5a9cf43b0b6415; _xsrf=jKLOKeMr5B7ymogXnWMxzsTI8lovQ7AC; _zap=60785992-3dcd-4133-9d59-36e788a58a82; d_c0="ADAipPkdEw-PTvS2GlazM6BpPtmiDErV8MU=|1551760963"; q_c1=1c472d1aeb5145d9bf0b4eb9d20e9f47|1551760965000|1551760965000'
+    ,'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36'
 }
 basic_url = 'https://www.zhihu.com/people/'
@@ -34,35 +34,45 @@ db_user = cf.get('db', 'db_user')
 db_pass = cf.get('db', 'db_pass')
 db_database = cf.get('db', 'db_database')
 logger = public_log()
-timeout = 10
+timeout = 60
 
 def get_html(url):
+    # session = get_session()
+    # result = requests.get(url, headers=headers, timeout=timeout)
+    # print(result.status_code)
+    # print(result.text)
+    # html = etree.HTML(result.text)
+    # return html
     try:
         try:
-
             result = requests.get(url, headers=headers, timeout=timeout)
         except Exception as e:
             proxy = get_proxy()
             result = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
         if result.status_code != 200:  # 根据其返回值代码判断其是否成功请求到目标页面
-            proxy = get_proxy()
+
             try:
+                proxy = get_proxy()
                 result = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
             except Exception as e:
                 proxy = get_proxy()
                 result = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
         html = etree.HTML(result.text)
+        print(result.text)
         if html.xpath('//title/text()')[0] == '安全验证 - 知乎':
-            proxy = get_proxy()
+            print('验证码！')
             try:
+                proxy = get_proxy()
                 result = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
                 html = etree.HTML(result.text)
             except Exception as e:
                 proxy = get_proxy()
                 result = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
                 html = etree.HTML(result.text)
+        print(result.text)
         return html
     except Exception as e:
+        print('有异常')
         return 0
 
 
@@ -120,6 +130,13 @@ def user_detail(user_name=start_name):
         #  url拼接原理：原始路径 + username + 页面模块标识 + page
         main_logic(new_url, user_name)
 
+def get_session():
+    s = requests.Session()
+    with open('session.txt', 'r', encoding='utf-8') as f:
+        cookies = json.load(f)
+        for cookie in cookies:
+            requests.utils.add_dict_to_cookiejar(s.cookies, {cookie['name']: cookie['value']})
+    return s
 
 if __name__ == '__main__':
     t_list = []
