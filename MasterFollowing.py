@@ -37,12 +37,6 @@ logger = public_log()
 timeout = 60
 
 def get_html(url):
-    # session = get_session()
-    # result = requests.get(url, headers=headers, timeout=timeout)
-    # print(result.status_code)
-    # print(result.text)
-    # html = etree.HTML(result.text)
-    # return html
     try:
         try:
             result = requests.get(url, headers=headers, timeout=timeout)
