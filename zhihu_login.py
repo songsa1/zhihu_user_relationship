@@ -24,8 +24,8 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36'
 }
 
-user = '15894648760'
-pwd = '*hs19931221*'
+user = '*******'
+pwd = '*********'
 
 def start_Chrome():  # 调用浏览器
     options = webdriver.ChromeOptions()

@@ -246,7 +246,7 @@ def address_map(conn, cursor):
     print(address)
 
 if __name__ == '__main__':
-    conn = pymysql.connect('118.24.26.224', 'root', '*hs19931221*', 'zhihu')
+    conn = pymysql.connect('********', 'root', '**********', 'zhihu')
     cursor = conn.cursor()
     # business_detail_percent(conn, cursor)
     # business_global_percent(conn, cursor)

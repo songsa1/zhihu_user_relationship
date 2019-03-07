@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import redis
 
-redis_pool = redis.ConnectionPool(host='118.24.26.224', port=6379,password="*hs19931221*" ,max_connections=20)  # 创建一个连接池
+redis_pool = redis.ConnectionPool(host='********', port=6379,password="********" ,max_connections=20)  # 创建一个连接池
 def get_link():
     conn = redis.Redis(connection_pool=redis_pool,decode_responses=True)  # 从池子里边起一个链接
     return conn
