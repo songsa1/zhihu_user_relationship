@@ -8,11 +8,9 @@
 import pymysql
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pyecharts import Pie
 from wordcloud import WordCloud
 from PIL import Image
 import numpy as np
-
 
 BUSINESS_LIST = {
     '高新科技': ['互联网', '电子商务', '电子游戏', '计算机软件', '计算机硬件'],
@@ -129,7 +127,7 @@ def gender_percent(conn, cursor):
         sql = 'select count(*) from activities where (gender = "{0}")'.format(i)
         cursor.execute(sql)
         name_num = cursor.fetchone()[0]
-        gender_num.append(round(name_num/user_num, 3))
+        gender_num.append(round(name_num / user_num, 3))
     cursor.close()
     conn.close()
     colors = ['#FF0000', '#63B8FF', '#dddddd']
@@ -139,6 +137,7 @@ def gender_percent(conn, cursor):
     plt.pie(gender_num, explode=explode, labels=gender_name, autopct='%3.1f%%', startangle=45, colors=colors)
     plt.title("知乎用户性别比例")
     plt.show()
+
 
 def school_pie(conn, cursor):
     """
@@ -155,17 +154,19 @@ def school_pie(conn, cursor):
     sql = 'select count(*) from activities where (school like "%大学%")'
     cursor.execute(sql)
     the_num = cursor.fetchone()[0]
-    education_num_list.append(round(the_num/user_num, 3))
-    education_num_list.append(round((user_num-the_num)/user_num, 3))
+    education_num_list.append(round(the_num / user_num, 3))
+    education_num_list.append(round((user_num - the_num) / user_num, 3))
     cursor.close()
     conn.close()
     colors = ['#63B8FF', '#dddddd']
     mpl.rcParams['font.sans-serif'] = ['SimHei']
     mpl.rcParams['axes.unicode_minus'] = False
     explode = (0.03, 0.03)
-    plt.pie(education_num_list, explode=explode, labels=education_name_list, autopct='%3.1f%%', startangle=45, colors=colors)
+    plt.pie(education_num_list, explode=explode, labels=education_name_list, autopct='%3.1f%%', startangle=45,
+            colors=colors)
     plt.title("知乎用户性别比例")
     plt.show()
+
 
 def word_cloud_school(conn, cursor):
     """
@@ -199,6 +200,7 @@ def word_cloud_school(conn, cursor):
     wc.generate(schools)
     wc.to_file('school.png')
 
+
 def address_word_cloud(conn, cursor):
     """
     居住地分析
@@ -229,24 +231,12 @@ def address_word_cloud(conn, cursor):
     wc.generate(address)
     wc.to_file('address.png')
 
-def address_map(conn, cursor):
-    """
-    城市地图
-    :param conn:
-    :param cursor:
-    :return:
-    """
-    address_list = list()
-    sql = 'select address from activities where (address != "")'
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    for i in result:
-        address_list.append(i[0])
-    address = ','.join(address_list)
-    print(address)
+
+
+
 
 if __name__ == '__main__':
-    conn = pymysql.connect('********', 'root', '**********', 'zhihu')
+    conn = pymysql.connect('******', 'root', '********', 'zhihu')
     cursor = conn.cursor()
     # business_detail_percent(conn, cursor)
     # business_global_percent(conn, cursor)
@@ -254,4 +244,3 @@ if __name__ == '__main__':
     # school_pie(conn, cursor)
     # word_cloud_school(conn, cursor)
     # address_word_cloud(conn, cursor)
-    address_map(conn, cursor)
