@@ -12,8 +12,8 @@ import requests
 
 class YDMHttp:
     apiurl = 'http://api.yundama.com/api.php'
-    username = 'songsongsong'
-    password = '*hs19931221*'
+    username = '*******'
+    password = '*******'
     appid = '6209'
     appkey = '0f8f9bb71e494ae7a97fd877bb639075'
 
